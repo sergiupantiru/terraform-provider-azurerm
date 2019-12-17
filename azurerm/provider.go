@@ -113,7 +113,6 @@ func Provider() terraform.ResourceProvider {
 	}
 
 	resources := map[string]*schema.Resource{
-		"azurerm_app_configuration":                                     resourceArmAppConfiguration(),
 		"azurerm_app_service_active_slot":                               resourceArmAppServiceActiveSlot(),
 		"azurerm_app_service_certificate":                               resourceArmAppServiceCertificate(),
 		"azurerm_app_service_certificate_order":                         resourceArmAppServiceCertificateOrder(),
