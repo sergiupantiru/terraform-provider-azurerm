@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/tf"
+	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/clients"
 )
 
 func TestAccAzureRMRecoveryFabric_basic(t *testing.T) {
@@ -80,8 +81,8 @@ func testCheckAzureRMRecoveryFabricExists(resourceGroupStateName, vaultStateName
 		fabricName := fabricState.Primary.Attributes["name"]
 
 		// Ensure fabric exists in API
-		client := testAccProvider.Meta().(*ArmClient).RecoveryServices.FabricClient(resourceGroupName, vaultName)
-		ctx := testAccProvider.Meta().(*ArmClient).StopContext
+		client := testAccProvider.Meta().(*clients.Client).RecoveryServices.FabricClient(resourceGroupName, vaultName)
+		ctx := testAccProvider.Meta().(*clients.Client).StopContext
 
 		resp, err := client.Get(ctx, fabricName)
 		if err != nil {

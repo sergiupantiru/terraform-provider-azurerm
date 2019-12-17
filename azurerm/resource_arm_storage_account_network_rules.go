@@ -11,6 +11,7 @@ import (
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/azure"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/tf"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/validate"
+	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/clients"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/features"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/locks"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/timeouts"
@@ -100,8 +101,8 @@ func resourceArmStorageAccountNetworkRules() *schema.Resource {
 }
 
 func resourceArmStorageAccountNetworkRulesCreateUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*ArmClient).Storage.AccountsClient
-	ctx, cancel := timeouts.ForCreateUpdate(meta.(*ArmClient).StopContext, d)
+	client := meta.(*clients.Client).Storage.AccountsClient
+	ctx, cancel := timeouts.ForCreateUpdate(meta.(*clients.Client).StopContext, d)
 	defer cancel()
 
 	storageAccountName := d.Get("storage_account_name").(string)
@@ -160,8 +161,8 @@ func resourceArmStorageAccountNetworkRulesCreateUpdate(d *schema.ResourceData, m
 }
 
 func resourceArmStorageAccountNetworkRulesRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*ArmClient).Storage.AccountsClient
-	ctx, cancel := timeouts.ForRead(meta.(*ArmClient).StopContext, d)
+	client := meta.(*clients.Client).Storage.AccountsClient
+	ctx, cancel := timeouts.ForRead(meta.(*clients.Client).StopContext, d)
 	defer cancel()
 
 	id, err := azure.ParseAzureResourceID(d.Id())
@@ -197,8 +198,8 @@ func resourceArmStorageAccountNetworkRulesRead(d *schema.ResourceData, meta inte
 }
 
 func resourceArmStorageAccountNetworkRulesDelete(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*ArmClient).Storage.AccountsClient
-	ctx, cancel := timeouts.ForDelete(meta.(*ArmClient).StopContext, d)
+	client := meta.(*clients.Client).Storage.AccountsClient
+	ctx, cancel := timeouts.ForDelete(meta.(*clients.Client).StopContext, d)
 	defer cancel()
 
 	parsedStorageAccountNetworkRuleId, err := azure.ParseAzureResourceID(d.Id())

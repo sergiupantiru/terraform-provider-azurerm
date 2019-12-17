@@ -19,6 +19,7 @@ import (
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/suppress"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/tf"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/validate"
+	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/clients"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/features"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/locks"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/tags"
@@ -617,9 +618,9 @@ func validateAzureRMStorageAccountTags(v interface{}, _ string) (warnings []stri
 }
 
 func resourceArmStorageAccountCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*ArmClient).Storage.AccountsClient
-	advancedThreatProtectionClient := meta.(*ArmClient).SecurityCenter.AdvancedThreatProtectionClient
-	ctx, cancel := timeouts.ForCreate(meta.(*ArmClient).StopContext, d)
+	client := meta.(*clients.Client).Storage.AccountsClient
+	advancedThreatProtectionClient := meta.(*clients.Client).SecurityCenter.AdvancedThreatProtectionClient
+	ctx, cancel := timeouts.ForCreate(meta.(*clients.Client).StopContext, d)
 	defer cancel()
 
 	storageAccountName := d.Get("name").(string)
@@ -755,7 +756,7 @@ func resourceArmStorageAccountCreate(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if val, ok := d.GetOk("queue_properties"); ok {
-		storageClient := meta.(*ArmClient).Storage
+		storageClient := meta.(*clients.Client).Storage
 		account, err := storageClient.FindAccount(ctx, storageAccountName)
 		if err != nil {
 			return fmt.Errorf("Error retrieving Account %q: %s", storageAccountName, err)
@@ -786,9 +787,9 @@ func resourceArmStorageAccountCreate(d *schema.ResourceData, meta interface{}) e
 // and idempotent operation for CreateOrUpdate. In particular updating all of the parameters
 // available requires a call to Update per parameter...
 func resourceArmStorageAccountUpdate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*ArmClient).Storage.AccountsClient
-	advancedThreatProtectionClient := meta.(*ArmClient).SecurityCenter.AdvancedThreatProtectionClient
-	ctx, cancel := timeouts.ForUpdate(meta.(*ArmClient).StopContext, d)
+	client := meta.(*clients.Client).Storage.AccountsClient
+	advancedThreatProtectionClient := meta.(*clients.Client).SecurityCenter.AdvancedThreatProtectionClient
+	ctx, cancel := timeouts.ForUpdate(meta.(*clients.Client).StopContext, d)
 	defer cancel()
 
 	id, err := azure.ParseAzureResourceID(d.Id())
@@ -961,7 +962,7 @@ func resourceArmStorageAccountUpdate(d *schema.ResourceData, meta interface{}) e
 	}
 
 	if d.HasChange("queue_properties") {
-		storageClient := meta.(*ArmClient).Storage
+		storageClient := meta.(*clients.Client).Storage
 		account, err := storageClient.FindAccount(ctx, storageAccountName)
 		if err != nil {
 			return fmt.Errorf("Error retrieving Account %q: %s", storageAccountName, err)
@@ -992,10 +993,10 @@ func resourceArmStorageAccountUpdate(d *schema.ResourceData, meta interface{}) e
 }
 
 func resourceArmStorageAccountRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*ArmClient).Storage.AccountsClient
-	advancedThreatProtectionClient := meta.(*ArmClient).SecurityCenter.AdvancedThreatProtectionClient
-	endpointSuffix := meta.(*ArmClient).Account.Environment.StorageEndpointSuffix
-	ctx, cancel := timeouts.ForRead(meta.(*ArmClient).StopContext, d)
+	client := meta.(*clients.Client).Storage.AccountsClient
+	advancedThreatProtectionClient := meta.(*clients.Client).SecurityCenter.AdvancedThreatProtectionClient
+	endpointSuffix := meta.(*clients.Client).Account.Environment.StorageEndpointSuffix
+	ctx, cancel := timeouts.ForRead(meta.(*clients.Client).StopContext, d)
 	defer cancel()
 
 	id, err := azure.ParseAzureResourceID(d.Id())
@@ -1153,7 +1154,7 @@ func resourceArmStorageAccountRead(d *schema.ResourceData, meta interface{}) err
 		}
 	}
 
-	storageClient := meta.(*ArmClient).Storage
+	storageClient := meta.(*clients.Client).Storage
 	account, err := storageClient.FindAccount(ctx, name)
 	if err != nil {
 		return fmt.Errorf("Error retrieving Account %q: %s", name, err)
@@ -1182,9 +1183,9 @@ func resourceArmStorageAccountRead(d *schema.ResourceData, meta interface{}) err
 }
 
 func resourceArmStorageAccountDelete(d *schema.ResourceData, meta interface{}) error {
-	storageClient := meta.(*ArmClient).Storage
+	storageClient := meta.(*clients.Client).Storage
 	client := storageClient.AccountsClient
-	ctx, cancel := timeouts.ForDelete(meta.(*ArmClient).StopContext, d)
+	ctx, cancel := timeouts.ForDelete(meta.(*clients.Client).StopContext, d)
 	defer cancel()
 
 	id, err := azure.ParseAzureResourceID(d.Id())

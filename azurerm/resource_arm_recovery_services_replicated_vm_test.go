@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/tf"
+	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/clients"
 )
 
 func TestAccAzureRMRecoveryReplicatedVm_basic(t *testing.T) {
@@ -246,8 +247,8 @@ func testCheckAzureRMRecoveryReplicatedVmExists(resourceGroupStateName, vaultSta
 		replicationName := replicationState.Primary.Attributes["name"]
 
 		// Ensure mapping exists in API
-		client := testAccProvider.Meta().(*ArmClient).RecoveryServices.ReplicationMigrationItemsClient(resourceGroupName, vaultName)
-		ctx := testAccProvider.Meta().(*ArmClient).StopContext
+		client := testAccProvider.Meta().(*clients.Client).RecoveryServices.ReplicationMigrationItemsClient(resourceGroupName, vaultName)
+		ctx := testAccProvider.Meta().(*clients.Client).StopContext
 
 		resp, err := client.Get(ctx, fabricName, protectionContainerName, replicationName)
 		if err != nil {
