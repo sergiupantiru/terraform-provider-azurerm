@@ -9,10 +9,6 @@ import (
 
 func Provider() terraform.ResourceProvider {
 	dataSources := map[string]*schema.Resource{
-		"azurerm_app_service_plan":                          dataSourceAppServicePlan(),
-		"azurerm_app_service_certificate":                   dataSourceAppServiceCertificate(),
-		"azurerm_app_service":                               dataSourceArmAppService(),
-		"azurerm_app_service_certificate_order":             dataSourceArmAppServiceCertificateOrder(),
 		"azurerm_application_security_group":                dataSourceArmApplicationSecurityGroup(),
 		"azurerm_automation_account":                        dataSourceArmAutomationAccount(),
 		"azurerm_automation_variable_bool":                  dataSourceArmAutomationVariableBool(),
@@ -112,14 +108,6 @@ func Provider() terraform.ResourceProvider {
 	}
 
 	resources := map[string]*schema.Resource{
-		"azurerm_app_service_active_slot":                               resourceArmAppServiceActiveSlot(),
-		"azurerm_app_service_certificate":                               resourceArmAppServiceCertificate(),
-		"azurerm_app_service_certificate_order":                         resourceArmAppServiceCertificateOrder(),
-		"azurerm_app_service_custom_hostname_binding":                   resourceArmAppServiceCustomHostnameBinding(),
-		"azurerm_app_service_plan":                                      resourceArmAppServicePlan(),
-		"azurerm_app_service_slot":                                      resourceArmAppServiceSlot(),
-		"azurerm_app_service_source_control_token":                      resourceArmAppServiceSourceControlToken(),
-		"azurerm_app_service":                                           resourceArmAppService(),
 		"azurerm_application_gateway":                                   resourceArmApplicationGateway(),
 		"azurerm_application_security_group":                            resourceArmApplicationSecurityGroup(),
 		"azurerm_automation_account":                                    resourceArmAutomationAccount(),
@@ -219,7 +207,6 @@ func Provider() terraform.ResourceProvider {
 		"azurerm_firewall":                                              resourceArmFirewall(),
 		"azurerm_frontdoor":                                             resourceArmFrontDoor(),
 		"azurerm_frontdoor_firewall_policy":                             resourceArmFrontDoorFirewallPolicy(),
-		"azurerm_function_app":                                          resourceArmFunctionApp(),
 		"azurerm_hdinsight_hadoop_cluster":                              resourceArmHDInsightHadoopCluster(),
 		"azurerm_hdinsight_hbase_cluster":                               resourceArmHDInsightHBaseCluster(),
 		"azurerm_hdinsight_interactive_query_cluster":                   resourceArmHDInsightInteractiveQueryCluster(),
