@@ -13,22 +13,18 @@ import (
 )
 
 func TestAccAzureRMRecoveryProtectionContainerMapping_basic(t *testing.T) {
-	resourceGroupName := "azurerm_resource_group.test1"
-	vaultName := "azurerm_recovery_services_vault.test"
-	fabricName := "azurerm_recovery_services_fabric.test1"
-	protectionContainerName := "azurerm_recovery_services_protection_container.test1"
 	resourceName := "azurerm_recovery_services_protection_container_mapping.test"
 	ri := tf.AccRandTimeInt()
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { acceptance.PreCheck(t) },
 		Providers:    acceptance.SupportedProviders,
-		CheckDestroy: testCheckAzureRMResourceGroupDestroy,
+		CheckDestroy: testCheckAzureRMRecoveryProtectionContainerMappingDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccAzureRMRecoveryProtectionContainerMapping_basic(ri, acceptance.Location(), acceptance.AltLocation()),
 				Check: resource.ComposeTestCheckFunc(
-					testCheckAzureRMRecoveryProtectionContainerMappingExists(resourceGroupName, vaultName, fabricName, protectionContainerName, resourceName),
+					testCheckAzureRMRecoveryProtectionContainerMappingExists(resourceName),
 				),
 			},
 			{
@@ -92,46 +88,30 @@ resource "azurerm_recovery_services_replication_policy" "test" {
 }
 
 resource "azurerm_recovery_services_protection_container_mapping" "test" {
+  name                                      = "mapping-%d"
   resource_group_name                       = "${azurerm_resource_group.test1.name}"
   recovery_vault_name                       = "${azurerm_recovery_services_vault.test.name}"
   recovery_fabric_name                      = "${azurerm_recovery_services_fabric.test1.name}"
   recovery_source_protection_container_name = "${azurerm_recovery_services_protection_container.test1.name}"
   recovery_target_protection_container_id   = "${azurerm_recovery_services_protection_container.test2.id}"
   recovery_replication_policy_id            = "${azurerm_recovery_services_replication_policy.test.id}"
-  name                                      = "mapping-%d"
 }
 `, rInt, location, rInt, rInt, rInt, altLocation, rInt, rInt, rInt, rInt)
 }
 
-func testCheckAzureRMRecoveryProtectionContainerMappingExists(resourceGroupStateName, vaultStateName string, resourceStateName string, protectionContainerStateName string, protectionContainerStateMappingName string) resource.TestCheckFunc {
+func testCheckAzureRMRecoveryProtectionContainerMappingExists(resourceName string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		// Ensure we have enough information in state to look up in API
-		resourceGroupState, ok := s.RootModule().Resources[resourceGroupStateName]
+		state, ok := s.RootModule().Resources[resourceName]
 		if !ok {
-			return fmt.Errorf("Not found: %s", resourceGroupStateName)
-		}
-		vaultState, ok := s.RootModule().Resources[vaultStateName]
-		if !ok {
-			return fmt.Errorf("Not found: %s", vaultStateName)
-		}
-		fabricState, ok := s.RootModule().Resources[resourceStateName]
-		if !ok {
-			return fmt.Errorf("Not found: %s", resourceStateName)
-		}
-		protectionContainerState, ok := s.RootModule().Resources[protectionContainerStateName]
-		if !ok {
-			return fmt.Errorf("Not found: %s", resourceStateName)
-		}
-		protectionContainerMappingState, ok := s.RootModule().Resources[protectionContainerStateMappingName]
-		if !ok {
-			return fmt.Errorf("Not found: %s", protectionContainerStateMappingName)
+			return fmt.Errorf("Not found: %s", resourceName)
 		}
 
-		resourceGroupName := resourceGroupState.Primary.Attributes["name"]
-		vaultName := vaultState.Primary.Attributes["name"]
-		fabricName := fabricState.Primary.Attributes["name"]
-		protectionContainerName := protectionContainerState.Primary.Attributes["name"]
-		mappingName := protectionContainerMappingState.Primary.Attributes["name"]
+		resourceGroupName := state.Primary.Attributes["resource_group_name"]
+		vaultName := state.Primary.Attributes["recovery_vault_name"]
+		fabricName := state.Primary.Attributes["recovery_fabric_name"]
+		protectionContainerName := state.Primary.Attributes["recovery_source_protection_container_name"]
+		mappingName := state.Primary.Attributes["name"]
 
 		// Ensure mapping exists in API
 		client := acceptance.AzureProvider.Meta().(*clients.Client).RecoveryServices.ContainerMappingClient(resourceGroupName, vaultName)
@@ -139,13 +119,40 @@ func testCheckAzureRMRecoveryProtectionContainerMappingExists(resourceGroupState
 
 		resp, err := client.Get(ctx, fabricName, protectionContainerName, mappingName)
 		if err != nil {
-			return fmt.Errorf("Bad: Get on fabricClient: %+v", err)
+			return fmt.Errorf("Bad: Get on RecoveryServices.ContainerMappingClient: %+v", err)
 		}
 
 		if resp.Response.StatusCode == http.StatusNotFound {
-			return fmt.Errorf("Bad: fabric: %q does not exist", fabricName)
+			return fmt.Errorf("Bad: Container Mapping: %q does not exist", fabricName)
 		}
 
 		return nil
 	}
+}
+func testCheckAzureRMRecoveryProtectionContainerMappingDestroy(s *terraform.State) error {
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "azurerm_recovery_services_protection_container_mapping" {
+			continue
+		}
+
+		resourceGroupName := rs.Primary.Attributes["resource_group_name"]
+		vaultName := rs.Primary.Attributes["recovery_vault_name"]
+		fabricName := rs.Primary.Attributes["recovery_fabric_name"]
+		protectionContainerName := rs.Primary.Attributes["recovery_source_protection_container_name"]
+		mappingName := rs.Primary.Attributes["name"]
+
+		client := acceptance.AzureProvider.Meta().(*clients.Client).RecoveryServices.ContainerMappingClient(resourceGroupName, vaultName)
+		ctx := acceptance.AzureProvider.Meta().(*clients.Client).StopContext
+
+		resp, err := client.Get(ctx, fabricName, protectionContainerName, mappingName)
+		if err != nil {
+			return nil
+		}
+
+		if resp.StatusCode != http.StatusNotFound {
+			return fmt.Errorf("Container Mapping still exists:\n%#v", resp.Properties)
+		}
+	}
+
+	return nil
 }
