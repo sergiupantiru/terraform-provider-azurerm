@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/azure"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/helpers/tf"
+	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/acceptance"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/clients"
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/features"
 	"golang.org/x/crypto/ssh"
@@ -30,7 +31,7 @@ func TestAccAzureRMImage_standaloneImage(t *testing.T) {
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    acceptance.SupportedProviders,
 		CheckDestroy: testCheckAzureRMImageDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -70,7 +71,7 @@ func TestAccAzureRMImage_standaloneImageZoneRedundant(t *testing.T) {
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    acceptance.SupportedProviders,
 		CheckDestroy: testCheckAzureRMImageDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -113,7 +114,7 @@ func TestAccAzureRMImage_requiresImport(t *testing.T) {
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    acceptance.SupportedProviders,
 		CheckDestroy: testCheckAzureRMImageDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -152,7 +153,7 @@ func TestAccAzureRMImage_customImageVMFromVHD(t *testing.T) {
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    acceptance.SupportedProviders,
 		CheckDestroy: testCheckAzureRMImageDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -187,7 +188,7 @@ func TestAccAzureRMImage_customImageVMFromVM(t *testing.T) {
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    acceptance.SupportedProviders,
 		CheckDestroy: testCheckAzureRMImageDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -222,7 +223,7 @@ func TestAccAzureRMImageVMSS_customImageVMSSFromVHD(t *testing.T) {
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
+		Providers:    acceptance.SupportedProviders,
 		CheckDestroy: testCheckAzureRMImageDestroy,
 		Steps: []resource.TestStep{
 			{
@@ -246,7 +247,7 @@ func TestAccAzureRMImageVMSS_customImageVMSSFromVHD(t *testing.T) {
 
 func testGeneralizeVMImage(resourceGroup string, vmName string, userName string, password string, hostName string, port string, location string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		armClient := testAccProvider.Meta().(*clients.Client)
+		armClient := acceptance.AzureProvider.Meta().(*clients.Client)
 		vmClient := armClient.Compute.VMClient
 		ctx := armClient.StopContext
 
@@ -324,8 +325,8 @@ func testCheckAzureRMImageExists(resourceName string, shouldExist bool) resource
 			return fmt.Errorf("Bad: no resource group found in state for image: %s", dName)
 		}
 
-		client := testAccProvider.Meta().(*clients.Client).Compute.ImagesClient
-		ctx := testAccProvider.Meta().(*clients.Client).StopContext
+		client := acceptance.AzureProvider.Meta().(*clients.Client).Compute.ImagesClient
+		ctx := acceptance.AzureProvider.Meta().(*clients.Client).StopContext
 
 		resp, err := client.Get(ctx, resourceGroup, dName, "")
 		if err != nil {
@@ -347,8 +348,8 @@ func testCheckAzureVMExists(sourceVM string, shouldExist bool) resource.TestChec
 	return func(s *terraform.State) error {
 		log.Printf("[INFO] testing MANAGED IMAGE VM EXISTS - BEGIN.")
 
-		client := testAccProvider.Meta().(*clients.Client).Compute.VMClient
-		ctx := testAccProvider.Meta().(*clients.Client).StopContext
+		client := acceptance.AzureProvider.Meta().(*clients.Client).Compute.VMClient
+		ctx := acceptance.AzureProvider.Meta().(*clients.Client).StopContext
 		vmRs, vmOk := s.RootModule().Resources[sourceVM]
 		if !vmOk {
 			return fmt.Errorf("VM Not found: %s", sourceVM)
@@ -382,8 +383,8 @@ func testCheckAzureVMSSExists(sourceVMSS string, shouldExist bool) resource.Test
 	return func(s *terraform.State) error {
 		log.Printf("[INFO] testing MANAGED IMAGE VMSS EXISTS - BEGIN.")
 
-		vmssClient := testAccProvider.Meta().(*clients.Client).Compute.VMScaleSetClient
-		ctx := testAccProvider.Meta().(*clients.Client).StopContext
+		vmssClient := acceptance.AzureProvider.Meta().(*clients.Client).Compute.VMScaleSetClient
+		ctx := acceptance.AzureProvider.Meta().(*clients.Client).StopContext
 		vmRs, vmOk := s.RootModule().Resources[sourceVMSS]
 		if !vmOk {
 			return fmt.Errorf("VMSS Not found: %s", sourceVMSS)
@@ -414,8 +415,8 @@ func testCheckAzureVMSSExists(sourceVMSS string, shouldExist bool) resource.Test
 }
 
 func testCheckAzureRMImageDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*clients.Client).Compute.DisksClient
-	ctx := testAccProvider.Meta().(*clients.Client).StopContext
+	client := acceptance.AzureProvider.Meta().(*clients.Client).Compute.DisksClient
+	ctx := acceptance.AzureProvider.Meta().(*clients.Client).StopContext
 
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "azurerm_image" {
