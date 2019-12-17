@@ -21,12 +21,12 @@ func TestAccAzureRMRecoveryNetworkMapping_basic(t *testing.T) {
 	ri := tf.AccRandTimeInt()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { acceptance.PreCheck(t) },
 		Providers:    acceptance.SupportedProviders,
 		CheckDestroy: testCheckAzureRMResourceGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAzureRMRecoveryNetworkMapping_basic(ri, testLocation(), testAltLocation()),
+				Config: testAccAzureRMRecoveryNetworkMapping_basic(ri, acceptance.Location(), acceptance.AltLocation()),
 				Check: resource.ComposeTestCheckFunc(
 					testCheckAzureRMRecoveryNetworkMappingExists(resourceGroupName, vaultName, fabricName, networkName, resourceName),
 				),

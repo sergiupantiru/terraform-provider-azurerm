@@ -12,9 +12,9 @@ import (
 func TestAccAzureRMDataSourceHealthcareService_basic(t *testing.T) {
 	dataSourceName := "data.azurerm_healthcare_service.test"
 	ri := tf.AccRandTimeInt() / 10
-	location := testLocation()
+	location := acceptance.Location()
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { acceptance.PreCheck(t) },
 		Providers:    acceptance.SupportedProviders,
 		CheckDestroy: testCheckAzureRMHealthcareServiceDestroy,
 		Steps: []resource.TestStep{

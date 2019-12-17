@@ -16,7 +16,7 @@ func TestAccAzureRMHealthcareService_basic(t *testing.T) {
 	ri := tf.AccRandTimeInt() / 10
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { acceptance.PreCheck(t) },
 		Providers:    acceptance.SupportedProviders,
 		CheckDestroy: testCheckAzureRMHealthcareServiceDestroy,
 		Steps: []resource.TestStep{

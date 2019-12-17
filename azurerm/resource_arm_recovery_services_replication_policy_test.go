@@ -19,12 +19,12 @@ func TestAccAzureRMRecoveryReplicationPolicy_basic(t *testing.T) {
 	ri := tf.AccRandTimeInt()
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
+		PreCheck:     func() { acceptance.PreCheck(t) },
 		Providers:    acceptance.SupportedProviders,
 		CheckDestroy: testCheckAzureRMResourceGroupDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccAzureRMRecoveryReplicationPolicy_basic(ri, testLocation()),
+				Config: testAccAzureRMRecoveryReplicationPolicy_basic(ri, acceptance.Location()),
 				Check: resource.ComposeTestCheckFunc(
 					testCheckAzureRMRecoveryReplicationPolicyExists(resourceGroupName, vaultName, resourceName),
 				),
