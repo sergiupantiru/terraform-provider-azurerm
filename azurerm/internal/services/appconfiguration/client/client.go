@@ -10,10 +10,10 @@ type Client struct {
 }
 
 func NewClient(o *common.ClientOptions) *Client {
-	AppConfigurationsClient := appconf.NewConfigurationStoresClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
-	o.ConfigureClient(&AppConfigurationsClient.Client, o.ResourceManagerAuthorizer)
+	appConfigurationsClient := appconf.NewConfigurationStoresClientWithBaseURI(o.ResourceManagerEndpoint, o.SubscriptionId)
+	o.ConfigureClient(&appConfigurationsClient.Client, o.ResourceManagerAuthorizer)
 
 	return &Client{
-		AppConfigurationsClient: &AppConfigurationsClient,
+		AppConfigurationsClient: &appConfigurationsClient,
 	}
 }
