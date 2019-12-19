@@ -43,6 +43,38 @@ func testAccDataSourceAzureRMKubernetesCluster_basic(t *testing.T) {
 	})
 }
 
+func testAccDataSourceAzureRMKubernetesCluster_privateLink(t *testing.T) {
+	resourceName := "azurerm_kubernetes_cluster.test"
+	ri := tf.AccRandTimeInt()
+	clientId := os.Getenv("ARM_CLIENT_ID")
+	clientSecret := os.Getenv("ARM_CLIENT_SECRET")
+	location := acceptance.Location()
+
+	privateIpAddressCdir := "10.0.0.0/8"
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:     func() { acceptance.PreCheck(t) },
+		Providers:    acceptance.SupportedProviders,
+		CheckDestroy: testCheckAzureRMKubernetesClusterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAzureRMKubernetesCluster_privateLinkConfig(ri, clientId, clientSecret, location, privateIpAddressCdir, true),
+				Check: resource.ComposeTestCheckFunc(
+					testCheckAzureRMKubernetesClusterExists(resourceName),
+					resource.TestCheckResourceAttrSet(resourceName, "private_fqdn"),
+					resource.TestCheckResourceAttr(resourceName, "api_server_authorized_ip_ranges.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "private_link_enabled", "true"),
+				),
+			},
+			{
+				ResourceName:            resourceName,
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"service_principal.0.client_secret"},
+			},
+		},
+	})
+}
+
 func testAccDataSourceAzureRMKubernetesCluster_roleBasedAccessControl(t *testing.T) {
 	dataSourceName := "data.azurerm_kubernetes_cluster.test"
 	ri := tf.AccRandTimeInt()

@@ -82,6 +82,24 @@ func resourceArmSearchService() *schema.Resource {
 				Computed: true,
 			},
 
+			"query_keys": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+
+						"key": {
+							Type:     schema.TypeString,
+							Computed: true,
+						},
+					},
+				},
+			},
+
 			"tags": tags.Schema(),
 		},
 	}
@@ -194,6 +212,12 @@ func resourceArmSearchServiceRead(d *schema.ResourceData, meta interface{}) erro
 		d.Set("secondary_key", adminKeysResp.SecondaryKey)
 	}
 
+	queryKeysClient := meta.(*clients.Client).Search.QueryKeysClient
+	queryKeysResp, err := queryKeysClient.ListBySearchService(ctx, resourceGroup, name, nil)
+	if err == nil {
+		d.Set("query_keys", flattenSearchQueryKeys(queryKeysResp.Value))
+	}
+
 	return tags.FlattenAndSet(d, resp.Tags)
 }
 
@@ -220,4 +244,21 @@ func resourceArmSearchServiceDelete(d *schema.ResourceData, meta interface{}) er
 	}
 
 	return nil
+}
+
+func flattenSearchQueryKeys(input *[]search.QueryKey) []interface{} {
+	results := make([]interface{}, 0)
+
+	for _, v := range *input {
+		result := make(map[string]interface{})
+
+		if v.Name != nil {
+			result["name"] = *v.Name
+		}
+		result["key"] = *v.Key
+
+		results = append(results, result)
+	}
+
+	return results
 }

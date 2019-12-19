@@ -73,17 +73,22 @@ func TestAccAzureRMCosmosDbSqlContainer_update(t *testing.T) {
 		CheckDestroy: testCheckAzureRMCosmosDbSqlContainerDestroy,
 		Steps: []resource.TestStep{
 			{
-
 				Config: testAccAzureRMCosmosDbSqlContainer_basic(ri, acceptance.Location()),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testCheckAzureRMCosmosDbSqlContainerExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "throughput", "600"),
 				),
 			},
 			{
-
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: testAccAzureRMCosmosDbSqlContainer_complete(ri, acceptance.Location()),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					testCheckAzureRMCosmosDbSqlContainerExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "throughput", "400"),
 				),
 			},
 			{
@@ -181,6 +186,26 @@ resource "azurerm_cosmosdb_sql_container" "test" {
   unique_key {
     paths = ["/definition/id1", "/definition/id2"]
   }
+  throughput = 600
+}
+
+`, testAccAzureRMCosmosDbSqlDatabase_basic(rInt, location), rInt)
+}
+
+func testAccAzureRMCosmosDbSqlContainer_update(rInt int, location string) string {
+	return fmt.Sprintf(`
+%[1]s
+
+resource "azurerm_cosmosdb_sql_container" "test" {
+  name                = "acctest-CSQLC-%[2]d"
+  resource_group_name = "${azurerm_cosmosdb_account.test.resource_group_name}"
+  account_name        = "${azurerm_cosmosdb_account.test.name}"
+  database_name       = "${azurerm_cosmosdb_sql_database.test.name}"
+  partition_key_path  = "/definition/id"
+  unique_key {
+	paths = ["/definition/id1", "/definition/id2"]
+  }
+  throughput = 400
 }
 
 `, testAccAzureRMCosmosDbSqlDatabase_basic(rInt, location), rInt)

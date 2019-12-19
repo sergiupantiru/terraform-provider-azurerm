@@ -83,6 +83,13 @@ func resourceArmSharedImageVersion() *schema.Resource {
 							Type:     schema.TypeInt,
 							Required: true,
 						},
+
+						"storage_account_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+							ForceNew: true,
+						},
 					},
 				},
 			},
@@ -257,10 +264,12 @@ func expandSharedImageVersionTargetRegions(d *schema.ResourceData) *[]compute.Ta
 
 		name := input["name"].(string)
 		regionalReplicaCount := input["regional_replica_count"].(int)
+		storageAccountType := input["storage_account_type"].(string)
 
 		output := compute.TargetRegion{
 			Name:                 utils.String(name),
 			RegionalReplicaCount: utils.Int32(int32(regionalReplicaCount)),
+			StorageAccountType:   compute.StorageAccountType(storageAccountType),
 		}
 		results = append(results, output)
 	}
@@ -282,6 +291,8 @@ func flattenSharedImageVersionTargetRegions(input *[]compute.TargetRegion) []int
 			if v.RegionalReplicaCount != nil {
 				output["regional_replica_count"] = int(*v.RegionalReplicaCount)
 			}
+
+			output["storage_account_type"] = string(v.StorageAccountType)
 
 			results = append(results, output)
 		}

@@ -9,7 +9,7 @@ import (
 	"github.com/terraform-providers/terraform-provider-azurerm/azurerm/internal/acceptance"
 )
 
-func TestAccAzureRMDataSourceHealthcareService_basic(t *testing.T) {
+func TestAccAzureRMDataSourceHealthCareService_basic(t *testing.T) {
 	dataSourceName := "data.azurerm_healthcare_service.test"
 	ri := tf.AccRandTimeInt() / 10
 	location := acceptance.Location()
@@ -34,7 +34,7 @@ func TestAccAzureRMDataSourceHealthcareService_basic(t *testing.T) {
 }
 
 func testAccAzureRMDataSourceHealthcareService_basic(rInt int, location string) string {
-	resource := testAccAzureRMHealthcareService_basic(rInt)
+	resource := testAccAzureRMHealthCareService_basic(rInt, location)
 	return fmt.Sprintf(`
 %s
 
